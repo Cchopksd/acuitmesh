@@ -36,91 +36,6 @@ interface ProgressColumn {
   items: Issue[];
 }
 
-function SortableIssueCard({
-  issue,
-  getPriorityColor,
-}: {
-  issue: Issue;
-  getPriorityColor: (priority: Issue["priority"]) => string;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: issue.id });
-
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleMouseDown = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseMove = () => {
-    setIsDragging(true);
-  };
-
-  const handleClick = (event: React.MouseEvent) => {
-    if (isDragging) {
-      event.preventDefault();
-      return;
-    }
-  };
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <a
-      href={`/${issue.id}`}
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onClick={handleClick}
-      className="bg-white border border-[#f1f2f4] rounded-md p-3 
-                   hover:shadow-md transition-shadow 
-                   flex justify-between items-start cursor-move">
-      <div>
-        <h3 className="font-semibold text-sm text-gray-800">{issue.title}</h3>
-        <p className="text-xs text-gray-500 mt-1">{issue.assignee}</p>
-      </div>
-      <span
-        className={`h-2 w-2 rounded-full ${getPriorityColor(issue.priority)}`}
-        title={`${issue.priority} Priority`}></span>
-    </a>
-  );
-}
-
-function DroppableColumn({
-  column,
-  children,
-}: {
-  column: ProgressColumn;
-  children: React.ReactNode;
-}) {
-  const { setNodeRef } = useDroppable({ id: column.name });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className="flex-1 bg-[#f1f2f4] rounded-lg shadow-md overflow-hidden">
-      {/* Column Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase">
-          {column.name}
-        </h2>
-        <span className="text-sm font-semibold text-gray-500">
-          {column.count}
-        </span>
-      </div>
-
-      {/* Column Content */}
-      <div className="p-4 space-y-3 min-h-[100px]">{children}</div>
-    </div>
-  );
-}
-
 export default function DraggableKanbanBoard() {
   const [columns, setColumns] = useState<ProgressColumn[]>([
     {
@@ -299,13 +214,104 @@ export default function DraggableKanbanBoard() {
     throw new Error(`Issue with id ${id} not found`);
   };
 
+  // When dragging an issue, show a preview of the issue being dragged
+  function SortableIssueCard({
+    issue,
+    getPriorityColor,
+  }: {
+    issue: Issue;
+    getPriorityColor: (priority: Issue["priority"]) => string;
+  }) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({ id: issue.id });
+
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleMouseDown = () => {
+      setIsDragging(false);
+    };
+
+    const handleMouseMove = () => {
+      setIsDragging(true);
+    };
+
+    const handleClick = (event: React.MouseEvent) => {
+      if (isDragging) {
+        event.preventDefault();
+        return;
+      }
+    };
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onClick={handleClick}
+        className={`bg-white border border-[#f1f2f4] rounded-md p-3 
+                     hover:shadow-md transition-shadow 
+                     flex justify-between items-start cursor-pointer ${
+                       issue.id === activeIssue?.id ? "hidden" : ""
+                     }`}>
+        <div>
+          <h3 className="font-semibold text-sm text-gray-800">{issue.title}</h3>
+          <p className="text-xs text-gray-500 mt-1">{issue.assignee}</p>
+        </div>
+        <span
+          className={`h-2 w-2 rounded-full ${getPriorityColor(issue.priority)}`}
+          title={`${issue.priority} Priority`}></span>
+      </div>
+    );
+  }
+
+  function DroppableColumn({
+    column,
+    children,
+  }: {
+    column: ProgressColumn;
+    children: React.ReactNode;
+  }) {
+    const { setNodeRef } = useDroppable({ id: column.name });
+
+    return (
+      <div
+        ref={setNodeRef}
+        className="flex-1 bg-[#f1f2f4] rounded-sm shadow-md overflow-hidden">
+        {/* Column Header */}
+        <div className="flex items-center gap-4 p-4">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase">
+            {column.name}
+          </h2>
+          <span className="text-sm font-semibold text-gray-500">
+            {column.count}
+          </span>
+        </div>
+
+        {/* Column Content */}
+        <div className="p-4 space-y-3 min-h-[100px]">{children}</div>
+      </div>
+    );
+  }
+
+  const handleOpenIssue = (issue: Issue) => {
+    console.log("Opening issue", issue);
+  };
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}>
-      <div className="p-6 min-h-screen">
+      <div className="p-6">
         <section className="mb-6">
           <div className="flex justify-between w-full items-center">
             <h1 className="text-3xl font-bold text-gray-800">Board</h1>
@@ -347,8 +353,9 @@ export default function DraggableKanbanBoard() {
         <DragOverlay>
           {activeIssue ? (
             <div
+              onClick={() => handleOpenIssue(activeIssue)}
               className="bg-white border border-[#f1f2f4] rounded-md p-3 
-                            shadow-lg flex justify-between items-start">
+                            shadow-lg flex justify-between items-start cursor-move">
               <div>
                 <h3 className="font-semibold text-sm text-gray-800">
                   {activeIssue.title}
@@ -360,8 +367,7 @@ export default function DraggableKanbanBoard() {
               <span
                 className={`h-2 w-2 rounded-full ${getPriorityColor(
                   activeIssue.priority
-                )}`}
-                title={`${activeIssue.priority} Priority`}></span>
+                )}`}></span>
             </div>
           ) : null}
         </DragOverlay>
