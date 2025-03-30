@@ -1,9 +1,11 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"os/signal"
 	config "server/configs"
+	"server/handlers/websocket"
 	"server/routes"
 	"syscall"
 
@@ -13,18 +15,10 @@ import (
 )
 
 func main() {
+	// Initialize loggers
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.SetLevel(logrus.InfoLevel)
-
-	config.Connect()
-    config.AutoMigrate()
-
-	r := gin.Default()
-
-    r.Use(gin.Recovery())
-    r.SetTrustedProxies(nil)
-
 
 	zapLogger, err := zap.NewProduction()
 	if err != nil {
@@ -32,25 +26,54 @@ func main() {
 	}
 	defer zapLogger.Sync()
 
-	apiGroup := r.Group("/api")
-    {
-		routes.UserRoutes(apiGroup, config.DB, zapLogger)
-        routes.AuthRoutes(apiGroup, config.DB, zapLogger)
-    }
+	// Initialize database
+	config.Connect()
+	config.AutoMigrate()
 
+	// Create Gin router
+	r := gin.Default()
+	r.Use(gin.Recovery())
+	r.SetTrustedProxies(nil)
+
+	// Initialize WebSocket Hub
+	wsHub := websocket.NewHub()
+	go wsHub.Run()
+
+	// Setup routes
+	apiGroup := r.Group("/api")
+	{
+		routes.UserRoutes(apiGroup, config.DB, zapLogger)
+		routes.AuthRoutes(apiGroup, config.DB, zapLogger)
+		routes.TaskBoardRoutes(apiGroup, config.DB, zapLogger)
+	}
+
+	// Add WebSocket route
+	r.GET("/ws", func(c *gin.Context) {
+		websocket.ServeWs(wsHub, c.Writer, c.Request)
+	})
+
+	// Start HTTP server
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
 
 	go func() {
 		logger.Info("Starting server on port 8080...")
-		if err := r.Run(":8080"); err != nil {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatal("Error running the server: ", err)
 		}
 	}()
 
+	// Graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan
 
 	logger.Info("Shutting down server...")
+
+	// Close WebSocket connections gracefully
+	wsHub.Shutdown()
 
 	logger.Info("Server stopped.")
 }
