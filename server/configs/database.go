@@ -6,9 +6,9 @@ import (
 	"os"
 	"server/models"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // Global DB variable
@@ -29,7 +29,7 @@ func Connect() {
 	}
 
 	// Open connection to the database
-	DB, Err = gorm.Open("postgres", databaseURL)
+	DB, Err = gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
 	if Err != nil {
 		log.Fatal("Failed to connect to the database:", Err)
 	} else {
@@ -40,5 +40,8 @@ func Connect() {
 func AutoMigrate() {
 	fmt.Println("Running AutoMigrate...")
 	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.Task{})
+	DB.AutoMigrate(&models.TaskBoard{})
+	DB.AutoMigrate(&models.UserTaskBoard{})
 	fmt.Println("AutoMigrate completed")
 }

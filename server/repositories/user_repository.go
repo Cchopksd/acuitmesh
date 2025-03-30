@@ -4,7 +4,7 @@ import (
 	"errors"
 	"server/models"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -15,20 +15,20 @@ type UserRepository interface {
 }
 
 type UserRepositoryImpl struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
-func NewUserRepository(DB *gorm.DB) *UserRepositoryImpl {
-	return &UserRepositoryImpl{DB: DB}
+func NewUserRepository(db *gorm.DB) *UserRepositoryImpl {
+	return &UserRepositoryImpl{db: db}
 }
 
 func (repo *UserRepositoryImpl) Create(user *models.User) error {
-	return repo.DB.Create(user).Error
+	return repo.db.Create(user).Error
 }
 
 func (repo *UserRepositoryImpl) FindAll() ([]models.User, error) {
 	var users []models.User
-	if err := repo.DB.Find(&users).Error; err != nil {
+	if err := repo.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -36,7 +36,7 @@ func (repo *UserRepositoryImpl) FindAll() ([]models.User, error) {
 
 func (repo *UserRepositoryImpl) FindByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := repo.DB.Where("email = ?", email).First(&user).Error
+	err := repo.db.Where("email = ?", email).First(&user).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -50,7 +50,7 @@ func (repo *UserRepositoryImpl) FindByEmail(email string) (*models.User, error) 
 
 func (repo *UserRepositoryImpl) GetUserByID(id uint) (*models.User, error) {
 	var user models.User
-	if err := repo.DB.First(&user, id).Error; err != nil {
+	if err := repo.db.First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

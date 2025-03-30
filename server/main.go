@@ -34,7 +34,7 @@ func main() {
 
 	apiGroup := r.Group("/api")
     {
-        routes.UserRoutes(apiGroup, config.DB, zapLogger)
+		routes.UserRoutes(apiGroup, config.DB, zapLogger)
         routes.AuthRoutes(apiGroup, config.DB, zapLogger)
     }
 

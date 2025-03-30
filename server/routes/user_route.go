@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 func UserRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
@@ -25,11 +25,11 @@ func UserRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 		public := userGroup.Group("")
 		public.Use(
 			middlewares.RequestLogger(logger),
-			middlewares.RateLimiter(100, time.Minute), // Limit the number of requests to 100 per minute
+			middlewares.RateLimiter(50, time.Minute), // ลด rate limit สำหรับ public
 		)
 		{
-			// Route to create a user (public route)
-			public.POST("", userController.CreateUser)
+			// Route to register a new user
+			public.POST("/register", userController.CreateUser)
 		}
 
 		// Protected routes (requires authentication)
@@ -37,16 +37,16 @@ func UserRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 		protected.Use(
 			middlewares.AuthMiddleware(logger),      // Authentication middleware
 			middlewares.RequestLogger(logger),       // Logging middleware
-			middlewares.RateLimiter(100, time.Minute), // Rate limiting
+			middlewares.RateLimiter(100, time.Minute), // Rate limiting (protected route มี limit สูงกว่า)
 		)
 		{
-			// Route to get all users (protected route)
+			// Route to get all users
 			protected.GET("", userController.GetAllUsers)
 
-			// Define other protected routes (e.g., get, update, delete for a single user)
-			// protected.GET("/:id", userController.GetUserByID)        // Get a specific user by ID
-			// protected.PUT("/:id", userController.UpdateUser)         // Update user by ID
-			// protected.DELETE("/:id", userController.DeleteUser)      // Delete user by ID
+			// Other protected routes
+			// protected.GET("/:id", userController.GetUserByID)   // Get a specific user by ID
+			// protected.PUT("/:id", userController.UpdateUser)    // Update user by ID
+			// protected.DELETE("/:id", userController.DeleteUser) // Delete user by ID
 		}
 	}
 }
