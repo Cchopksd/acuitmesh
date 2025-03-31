@@ -31,6 +31,7 @@ type UserServiceImpl struct {
 func NewUserService(userRepo repositories.UserRepository, logger *zap.Logger) UserService {
 	return &UserServiceImpl{
 		userRepo: userRepo,
+		
 		logger:   logger,
 	}
 }

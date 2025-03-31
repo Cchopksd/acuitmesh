@@ -4,6 +4,7 @@ import (
 	"errors"
 	"server/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +12,7 @@ type UserRepository interface {
 	Create(user *models.User) error
 	FindAll() ([]models.User, error)
 	FindByEmail(email string) (*models.User, error)
-	GetUserByID(id uint) (*models.User, error)
+	GetUserByID(id uuid.UUID) (*models.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -48,7 +49,7 @@ func (repo *UserRepositoryImpl) FindByEmail(email string) (*models.User, error) 
 	return &user, nil
 }
 
-func (repo *UserRepositoryImpl) GetUserByID(id uint) (*models.User, error) {
+func (repo *UserRepositoryImpl) GetUserByID(id uuid.UUID) (*models.User, error) {
 	var user models.User
 	if err := repo.db.First(&user, id).Error; err != nil {
 		return nil, err

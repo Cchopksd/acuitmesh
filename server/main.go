@@ -45,12 +45,8 @@ func main() {
 		routes.UserRoutes(apiGroup, config.DB, zapLogger)
 		routes.AuthRoutes(apiGroup, config.DB, zapLogger)
 		routes.TaskBoardRoutes(apiGroup, config.DB, zapLogger)
+		routes.TaskRoutes(apiGroup, config.DB, zapLogger)
 	}
-
-	// Add WebSocket route
-	r.GET("/ws", func(c *gin.Context) {
-		websocket.ServeWs(wsHub, c.Writer, c.Request)
-	})
 
 	// Start HTTP server
 	server := &http.Server{

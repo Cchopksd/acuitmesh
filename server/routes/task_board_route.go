@@ -14,7 +14,8 @@ import (
 
 func TaskBoardRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 	taskBoardRepository := repositories.NewTaskBoardRepository(db)
-	taskBoardService := services.NewTaskBoardService(taskBoardRepository, logger)
+	userRepository := repositories.NewUserRepository(db)
+	taskBoardService := services.NewTaskBoardService(taskBoardRepository, logger, userRepository)
 	taskBoardController := controllers.NewTaskBoardController(taskBoardService, logger)
 
 	taskBoardGroup := router.Group("/task-boards")
@@ -25,12 +26,13 @@ func TaskBoardRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 			middlewares.RequestLogger(logger),        
 			middlewares.RateLimiter(100, time.Minute),
 		)
-
-		protected.GET("", taskBoardController.GetTaskBoardsByUserID)       
-		protected.POST("", taskBoardController.CreateTaskBoard)           
-		protected.GET("/:id", taskBoardController.GetTaskBoardByID)        
-		protected.PUT("/:id", taskBoardController.UpdateTaskBoard)         
-		protected.DELETE("/:id", taskBoardController.DeleteTaskBoard)      
-		protected.POST("/:id/collaborators", taskBoardController.AddCollaborator) 
+		{
+			protected.POST("", taskBoardController.CreateTaskBoard)           
+			protected.GET("/:id", taskBoardController.GetTaskBoardByID)        
+			protected.GET("/user/:user_id", taskBoardController.GetTaskBoardsByUserID)       
+			protected.PUT("/:id", taskBoardController.UpdateTaskBoard)         
+			protected.DELETE("/:id", taskBoardController.DeleteTaskBoard)      
+			protected.POST("/:id/collaborators", taskBoardController.AddCollaborator) 
+		}
 	}
 }

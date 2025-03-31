@@ -51,12 +51,12 @@ func (s *AuthServiceImpl) Login(email, password string) (string, error) {
 
 	// Generate JWT token
 	token, err := utils.CreateToken(utils.User{
-		ID:    user.UID.String(),
+		ID:    user.ID.String(),
 		Name:  user.Name,
 		Email: user.Email,
 	})
 	if err != nil {
-		s.logger.Error("Failed to generate token", zap.String("userID", user.UID.String()), zap.Error(err))
+		s.logger.Error("Failed to generate token", zap.String("userID", user.ID.String()), zap.Error(err))
 		return "", fmt.Errorf("authentication failed")
 	}
 

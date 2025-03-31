@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"server/dto"
 	"server/models"
 	"server/repositories"
@@ -10,8 +11,8 @@ import (
 )
 
 type TaskBoardService interface {
-	CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.TaskBoard, error)
-	FindTaskBoardByID(taskBoardID uuid.UUID) (*models.TaskBoard, error)
+	CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.UserTaskBoard, error)
+	FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID) (*models.TaskBoard, error)
 	FindTaskBoardByUserID(userID uuid.UUID) ([]models.TaskBoard, error)
 	UpdateTaskBoard(taskID uuid.UUID, taskDTO *dto.TaskBoardRequest) (*models.TaskBoard, error)
 	DeleteTaskBoard(taskBoardID uuid.UUID) error
@@ -20,30 +21,58 @@ type TaskBoardService interface {
 
 type TaskBoardServiceImpl struct {
 	taskBoardRepo repositories.TaskBoardRepository
+	userRepo      repositories.UserRepository
 	logger   *zap.Logger
 }
 
-func NewTaskBoardService(taskBoardRepo repositories.TaskBoardRepository, logger *zap.Logger) *TaskBoardServiceImpl {
+func NewTaskBoardService(taskBoardRepo repositories.TaskBoardRepository, logger *zap.Logger, userRepo repositories.UserRepository) *TaskBoardServiceImpl {
 	return &TaskBoardServiceImpl{
 		taskBoardRepo: taskBoardRepo,
+		userRepo:      userRepo,
 		logger:   logger,
 	}
 }
 
-func (service *TaskBoardServiceImpl) CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.TaskBoard, error){
+func (service *TaskBoardServiceImpl) CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.UserTaskBoard, error) {
+	userID, err := uuid.Parse(taskBoardDTO.User)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID format")
+	}
+	
+	if _, err := service.userRepo.GetUserByID(userID); err != nil {
+		service.logger.Error("User not found", zap.Error(err))
+		return nil, fmt.Errorf("user does not exist")
+	}
+	
 	taskBoard := &models.TaskBoard{
-		Title: taskBoardDTO.Title,
+		Title:       taskBoardDTO.Title,
 		Description: taskBoardDTO.Description,
 	}
 
-	err := service.taskBoardRepo.Create(taskBoard)
+	taskBoardResponse, err := service.taskBoardRepo.Create(taskBoard)
+	if err != nil {
+		service.logger.Error("Error creating task board", zap.Error(err))
+		return nil, err
+	}
+	service.logger.Info("Task board created successfully", zap.String("taskBoardID", taskBoardResponse.ID.String()))
+
+	userTaskBoard := &models.UserTaskBoard{
+		UserID:      uuid.MustParse(taskBoardDTO.User),
+		TaskBoardID: taskBoardResponse.ID,
+		Role:        "owner", 
+	}
+
+	// Create the user-task board association
+	userTaskBoardResponse, err := service.taskBoardRepo.CreateUserBoard(userTaskBoard)
 	if err != nil {
 		return nil, err
 	}
-	return taskBoard, nil
+
+	return userTaskBoardResponse, nil
 }
 
-func (service *TaskBoardServiceImpl) FindTaskBoardByID(taskBoardID uuid.UUID) (*models.TaskBoard ,error){
+
+func (service *TaskBoardServiceImpl) FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID) (*models.TaskBoard ,error){
 	taskBoard, err := service.taskBoardRepo.FindByID(taskBoardID)
 
 	if err != nil {
@@ -82,9 +111,18 @@ func (service *TaskBoardServiceImpl) DeleteTaskBoard(taskBoardID uuid.UUID) erro
 }
 
 func (service *TaskBoardServiceImpl) AddCollaboratorOnTaskBoard(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error) {
-	if _, err := service.taskBoardRepo.FindByID(addCollaboratorDTO.TaskBoardID); err != nil {
-		return nil, err
+	if _, err := service.userRepo.GetUserByID(addCollaboratorDTO.UserID); err != nil {
+		return nil, fmt.Errorf("user not found")
 	}
+
+	if _, err := service.taskBoardRepo.FindByID(addCollaboratorDTO.TaskBoardID); err != nil {
+		return nil, fmt.Errorf("task board not found")
+	}
+
+	if _, err := service.taskBoardRepo.CheckUserRole(addCollaboratorDTO.TaskBoardID, addCollaboratorDTO.UserID); err == nil {
+		return nil, fmt.Errorf("user already exists on this task board")
+	}
+
 
 	return service.taskBoardRepo.AddCollaborator(addCollaboratorDTO)
 }
