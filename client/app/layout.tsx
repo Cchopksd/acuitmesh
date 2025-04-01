@@ -23,9 +23,12 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Sidebar />
-        <main className="ml-64 p-8">{children}</main>{" "}
-        {/* Adjusted to avoid sidebar overlap */}
+        <div className="flex flex-col md:flex-row min-h-screen">
+          <Sidebar />
+          <main className="flex-1 p-4 md:p-8 w-full md:ml-0">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
