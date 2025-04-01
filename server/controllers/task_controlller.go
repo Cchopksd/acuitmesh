@@ -129,6 +129,9 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 
 func (c *TaskController) DeleteTask(ctx *gin.Context) {
 	taskIDStr := ctx.Param("id")
+	taskBoardIDStr := ctx.Param("task_board_id")
+	userIDStr := ctx.Param("user_id")
+
 	taskID, err := uuid.Parse(taskIDStr)
 	if err != nil {
 		c.logger.Error("Invalid task ID", zap.Error(err))
@@ -140,7 +143,29 @@ func (c *TaskController) DeleteTask(ctx *gin.Context) {
 		return
 	}
 
-	err = c.taskService.DeleteTask(taskID)
+	taskBoardID, err := uuid.Parse(taskBoardIDStr)
+	if err != nil {
+		c.logger.Error("Invalid task board ID", zap.Error(err))
+		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid task board ID",
+			Details: map[string]string{"error": err.Error()},
+		})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.logger.Error("Invalid user ID", zap.Error(err))
+		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid user ID",
+			Details: map[string]string{"error": err.Error()},
+		})
+		return
+	}
+
+	err = c.taskService.DeleteTask(taskID, taskBoardID, userID)
 	if err != nil {
 		c.logger.Error("Failed to delete task", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{

@@ -17,7 +17,6 @@ type TaskRepository interface {
 	Delete(taskID uuid.UUID) error
 }
 
-// TaskRepositoryImpl is the concrete implementation of TaskRepository
 type TaskRepositoryImpl struct {
 	db *gorm.DB
 }
@@ -48,14 +47,26 @@ func (repo *TaskRepositoryImpl) FindByID(taskID uuid.UUID) (*models.Task, error)
 
 
 func (repo *TaskRepositoryImpl) Update(taskID uuid.UUID, task *models.Task) (*models.Task, error) {
-	err := repo.db.Model(&models.TaskBoard{}).Where("id = ?", taskID).Updates(task).Error
+	err := repo.db.Model(&models.Task{}).Where("id = ?", taskID).Updates(task).Error
 	if err != nil {
 		return nil, err
 	}
-	return task, nil
+
+	var updatedTask models.Task
+	if err := repo.db.Preload("TaskBoard").First(&updatedTask, "id = ?", taskID).Error; err != nil {
+		return nil, err
+	}
+	return &updatedTask, nil
 }
 
-func (repo *TaskRepositoryImpl) Delete(taskID uuid.UUID) error {
-	return repo.db.Delete(&models.TaskBoard{}, "id = ?", taskID).Error
 
+func (repo *TaskRepositoryImpl) Delete(taskID uuid.UUID) error {
+	result := repo.db.Delete(&models.Task{}, "id = ?", taskID)
+	if result.Error != nil {
+		return fmt.Errorf("failed to delete task with ID %s: %w", taskID, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("no task found with ID %s", taskID)
+	}
+	return nil
 }

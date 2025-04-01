@@ -14,7 +14,8 @@ import (
 
 func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 	taskRepository := repositories.NewTaskRepository(db)
-	taskService := services.NewTaskService(taskRepository, logger)
+	taskBoardRepository := repositories.NewTaskBoardRepository(db)
+	taskService := services.NewTaskService(taskRepository, logger, taskBoardRepository)
 	taskController := controllers.NewTaskController(taskService, logger)
 
 	taskGroup := router.Group("/tasks")
@@ -29,7 +30,7 @@ func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 			taskGroup.POST("/", taskController.CreateTask)
 			taskGroup.GET("/:id", taskController.GetTaskByID)
 			taskGroup.PUT("/:id", taskController.UpdateTask)
-			taskGroup.DELETE("/:id", taskController.DeleteTask)
+			taskGroup.DELETE("/:id/task_board_id/:id/user_id/:id", taskController.DeleteTask)
 		}
 	}
 }

@@ -13,13 +13,10 @@ type TaskBoard struct {
 	CreatedAt   time.Time    `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time    `gorm:"autoUpdateTime" json:"updated_at"`
 	
-	// Many-to-many relationship with User through UserTaskBoard
 	Users       []User       `gorm:"many2many:user_task_boards;" json:"users,omitempty"`
-	// One-to-many relationship with Task
 	Tasks       []Task       `gorm:"foreignKey:TaskBoardID" json:"tasks,omitempty"`
 }
 
-// UserTaskBoard is the join table for the many-to-many relationship between User and TaskBoard
 type UserTaskBoard struct {
 	UserID      uuid.UUID `gorm:"type:uuid;not null;primaryKey" json:"user_id"`
 	TaskBoardID uuid.UUID `gorm:"type:uuid;not null;primaryKey" json:"task_board_id"`
@@ -27,12 +24,10 @@ type UserTaskBoard struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 	
-	// References
 	User       User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	TaskBoard  TaskBoard `gorm:"foreignKey:TaskBoardID" json:"task_board,omitempty"`
 }
 
-// Task represents a task within a board
 type Task struct {
 	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	TaskBoardID uuid.UUID `gorm:"type:uuid;not null;index" json:"task_board_id"`
@@ -45,6 +40,5 @@ type Task struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 	
-	// References
 	TaskBoard   TaskBoard `gorm:"foreignKey:TaskBoardID" json:"task_board,omitempty"`
 }

@@ -19,8 +19,10 @@ type AssignTask struct {
 
 
 type UpdateTaskRequest struct {
-    Title       string    `json:"title" binding:"required, max=255"`
-    Description string    `json:"description" binding:"max=255"`
+    UserID      uuid.UUID `json:"user_id" binding:"required"`
+    TaskBoardID uuid.UUID `json:"task_board_id" binding:"required"`
+    Title       string    `json:"title" binding:"required"`
+    Description string    `json:"description"`
     Status      string    `json:"status" binding:"oneof=todo in_progress done"`
     Priority    string    `json:"priority" binding:"oneof=low medium high"`
     StartDate   time.Time `json:"start_date"`

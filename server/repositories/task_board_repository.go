@@ -80,14 +80,17 @@ func (repo *TaskBoardRepositoryImpl) FindByID(taskBoardID uuid.UUID) (*models.Ta
 
 func (repo *TaskBoardRepositoryImpl) FindByUserID(userID uuid.UUID) ([]models.TaskBoard, error) {
 	var taskBoards []models.TaskBoard
-	err := repo.db.Joins("JOIN user_task_boards ON task_boards.id = user_task_boards.task_board_id").
+	err := repo.db.Preload("Users").
+		Joins("JOIN user_task_boards ON task_boards.id = user_task_boards.task_board_id").
 		Where("user_task_boards.user_id = ?", userID).
 		Find(&taskBoards).Error
+
 	if err != nil {
 		return nil, err
 	}
 	return taskBoards, nil
 }
+
 
 
 func (repo *TaskBoardRepositoryImpl) Update(taskBoardID uuid.UUID, taskBoard *models.TaskBoard) (*models.TaskBoard, error) {
