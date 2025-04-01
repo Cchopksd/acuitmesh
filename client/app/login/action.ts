@@ -15,7 +15,8 @@ export const loginAction = async (email: string, password: string) => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const { data } = await response.json();
+
 
     const cookieStore = await cookies();
     cookieStore.set("token-user", data.token, {
