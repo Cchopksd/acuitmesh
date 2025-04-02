@@ -1,35 +1,45 @@
 "use client";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import Cookies from "js-cookie";
 
 const menu = [
-  { name: "Backlog", icon: "backlog", navigation: "/backlog" },
-  { name: "Board", icon: "board", navigation: "/board" },
-  { name: "Reports", icon: "reports", navigation: "/reports" },
-  { name: "Releases", icon: "releases", navigation: "/releases" },
-  { name: "Components", icon: "components", navigation: "/components" },
-  { name: "Issues", icon: "issues", navigation: "/issues" },
-  { name: "Repository", icon: "repository", navigation: "/repository" },
-  { name: "Add Item", icon: "settings", navigation: "/add-item" },
-  { name: "Settings", icon: "settings", navigation: "/settings" },
+  { name: "Backlog", navigation: "/backlog" },
+  { name: "Board", navigation: "/board" },
+  { name: "Reports", navigation: "/reports" },
+  { name: "Releases", navigation: "/releases" },
+  { name: "Components", navigation: "/components" },
+  { name: "Issues", navigation: "/issues" },
+  { name: "Repository", navigation: "/repository" },
+  { name: "Add Item", navigation: "/add-item" },
+  { name: "Settings", navigation: "/settings" },
 ];
 
 const hideList = ["/login", "/register"];
 
-export default function Sidebar() {
+export default function Sidebar({
+  userInfo,
+}: {
+  userInfo: { id: string; email: string; name: string };
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   if (hideList.includes(pathname)) return null;
+
+  const handleLogout = async () => {
+    await Cookies.remove("token-user");
+    window.location.href = "/board";
+  };
 
   return (
     <>
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-[#f1f2f4] p-2 rounded-md shadow-md"
+        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md focus:outline-none focus:ring"
         aria-label={isOpen ? "Close sidebar" : "Open sidebar"}>
         <svg
           width="24"
@@ -49,48 +59,57 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <nav
-        className={`bg-[#f1f2f4] text-black w-full max-w-64 h-screen overflow-y-auto
-                   fixed md:sticky top-0 left-0 z-40 flex flex-col p-4 gap-4 py-8 shadow-md
-                   transition-transform duration-300 ease-in-out
+        className={`bg-gray-100 text-black w-64 h-screen overflow-y-auto fixed md:relative top-0 left-0 z-40 flex flex-col p-6 gap-6 transition-transform duration-300 ease-in-out shadow-lg 
                    ${
                      isOpen
                        ? "translate-x-0"
                        : "-translate-x-full md:translate-x-0"
                    }`}>
         {/* User Info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 border-b pb-4">
           <div className="w-12 h-12 relative rounded-full overflow-hidden">
             <Image
               src="https://cdn-icons-png.flaticon.com/512/6858/6858504.png"
-              alt="avatar"
+              alt="User Avatar"
               fill
               sizes="48px"
               className="object-cover"
             />
           </div>
           <div>
-            <h2 className="font-bold text-lg">Teams in Space</h2>
-            <p className="text-sm text-[#a3aabb]">Software project</p>
+            <h2 className="font-bold text-lg">{userInfo.name}</h2>
+            <p className="text-sm text-gray-500">Software Project</p>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <div className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-2">
           {menu.map((item, idx) => (
-            <Link
-              key={idx}
-              href={item.navigation}
-              onClick={() => isOpen && setIsOpen(false)} // Only close on mobile
-              className={`flex items-center p-3 rounded-md font-semibold transition-colors ${
-                pathname === item.navigation
-                  ? "text-[#00419c] bg-[#e4e9ec] font-bold"
-                  : "text-[#3c4c70] hover:bg-[#dfe3e8]"
-              }`}
-              aria-current={pathname === item.navigation ? "page" : undefined}>
-              {item.name}
-            </Link>
+            <li key={idx}>
+              <a
+                href={item.navigation}
+                onClick={() => isOpen && setIsOpen(false)}
+                className={`block p-3 rounded-md font-semibold transition-colors text-sm
+                  ${
+                    pathname === item.navigation
+                      ? "bg-blue-200 text-blue-900"
+                      : "text-gray-700 hover:bg-gray-300"
+                  }`}
+                aria-current={
+                  pathname === item.navigation ? "page" : undefined
+                }>
+                {item.name}
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="mt-auto p-3 rounded-md text-red-600 font-semibold bg-red-100 hover:bg-red-200">
+          Logout
+        </button>
       </nav>
 
       {/* Mobile Overlay */}

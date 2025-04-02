@@ -20,3 +20,11 @@ export const decodeUserToken = async () => {
   return decoded;
 };
 
+export const destroyUserToken = async () => {
+  const cookieStore = await cookies();
+
+  cookieStore.delete("token-user");
+
+  return;
+};
+

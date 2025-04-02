@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 h-screen">
+    <div className="flex items-center justify-center h-screen">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
@@ -110,7 +110,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm">
           <span className="text-gray-600">Don't have an account? </span>
           <a
-            href="#"
+            href="/register"
             className="text-blue-600 hover:underline">
             Register
           </a>
