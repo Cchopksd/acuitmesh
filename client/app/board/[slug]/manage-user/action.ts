@@ -1,18 +1,11 @@
 "use server";
-import { JwtPayload } from "jwt-decode";
-import { decodeUserToken, getUserToken } from "../utils/token";
+import { getUserToken } from "@/app/utils/token";
 
-export const FetchTaskBoardByUser = async () => {
+export const FetchUserCollaboration = async ({ id }: { id: string }) => {
   try {
     const token = await getUserToken();
-    const userInfo = (await decodeUserToken()) as JwtPayload & { id: string };
-
-    if (!userInfo) {
-      throw new Error("Failed to decode user token: userInfo is undefined");
-    }
-
     const response = await fetch(
-      `${process.env.API_URL}/task-boards/user/${userInfo.id}`,
+      `${process.env.API_URL}/task-boards/${id}/collaborators`,
       {
         method: "GET",
         headers: {
@@ -28,7 +21,6 @@ export const FetchTaskBoardByUser = async () => {
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (err) {
     console.error("Failed to fetch Task board:", err);

@@ -50,7 +50,12 @@ export default async function TaskBoardPage() {
                   <span>Updated: {formatDate(board.updated_at)}</span>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-3 flex justify-end">
+              <div className="bg-gray-50 px-6 py-3 flex justify-end gap-4">
+                <a
+                  href={`/board/${board.id}/manage-user`}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer">
+                  Manage User
+                </a>
                 <a
                   href={`/board/${board.id}`}
                   className="text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer">

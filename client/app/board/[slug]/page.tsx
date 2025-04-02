@@ -4,8 +4,12 @@ import React from "react";
 import KanbanBoard from "./components/Board";
 import { FetchTaskBoardExTendTask } from "./action";
 
-export default async function page({ params }: { params: { slug: string } }) {
-  const slug = params.slug;
+export default async function page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const boardDetail = await FetchTaskBoardExTendTask({ id: slug });
 
   return (
