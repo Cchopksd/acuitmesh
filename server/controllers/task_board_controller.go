@@ -130,10 +130,12 @@ func (controller *TaskBoardController) UpdateTaskBoard(ctx *gin.Context) {
 
 	var taskBoardDTO dto.TaskBoardRequest
 	if err := ctx.ShouldBindJSON(&taskBoardDTO); err != nil {
+		validationErrors := helpers.FormatValidationError(err)
+
 		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
 			Code:    http.StatusBadRequest,
-			Message: "Invalid request data",
-			Details: map[string]string{"error": err.Error()},
+			Message: "Validation failed",
+			Details: validationErrors,
 		})
 		return
 	}
@@ -143,7 +145,7 @@ func (controller *TaskBoardController) UpdateTaskBoard(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to update TaskBoard",
-			Details: map[string]string{"error": err.Error()},
+			Details: helpers.FormatValidationError(err),
 		})
 		return
 	}
@@ -155,7 +157,6 @@ func (controller *TaskBoardController) UpdateTaskBoard(ctx *gin.Context) {
 	})
 }
 
-// Delete TaskBoard
 func (controller *TaskBoardController) DeleteTaskBoard(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
@@ -181,24 +182,21 @@ func (controller *TaskBoardController) DeleteTaskBoard(ctx *gin.Context) {
 	})
 }
 
-// Add Collaborator
 func (c *TaskBoardController) AddCollaborator(ctx *gin.Context) {
 	var addCollaboratorDTO dto.AddCollaborator
 	if err := ctx.ShouldBindJSON(&addCollaboratorDTO); err != nil {
-		c.logger.Error("Invalid input", zap.Error(err))
+		validationErrors := helpers.FormatValidationError(err)
 		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid input data",
-			Details: map[string]string{"error": err.Error()},
+			Details: validationErrors,
 		})
 		return
 	}
 
-	// Call service to add collaborator
 	userTaskBoard, err := c.taskBoardService.AddCollaboratorOnTaskBoard(addCollaboratorDTO)
 	if err != nil {
 		c.logger.Error("Failed to add collaborator", zap.Error(err))
-		// Depending on the error type, you can customize the response
 		var statusCode int
 		var message string
 		if err.Error() == "user not found" {
@@ -230,3 +228,29 @@ func (c *TaskBoardController) AddCollaborator(ctx *gin.Context) {
 	})
 }
 
+func (c *TaskBoardController) GetCollaboratorOnTaskBoard(ctx *gin.Context) {
+	taskBoardID, err := uuid.Parse(ctx.Param("id"))
+	fmt.Print(taskBoardID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid task board ID",
+		})
+		return
+	}
+
+	collaborator, err := c.taskBoardService.GetCollaboratorOnTaskBoard(taskBoardID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve collaborator",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helpers.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "Collaborator retrieved successfully",
+		Data:    collaborator,
+	})
+}

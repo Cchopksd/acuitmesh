@@ -27,8 +27,6 @@ func (controller *UserController) CreateUser(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
 		validationErrors := helpers.FormatValidationError(err)
-		controller.logger.Warn("Validation failed", zap.Error(err))
-		
 		c.JSON(http.StatusBadRequest, helpers.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: "Validation failed",
@@ -75,6 +73,7 @@ func (controller *UserController) GetAllUsers(c *gin.Context) {
 
 	if len(users) == 0 {
 		c.JSON(http.StatusOK, helpers.SuccessResponse{
+			Code: 404,
 			Message: "No users found",
 			Data:    []interface{}{},
 		})
@@ -82,6 +81,7 @@ func (controller *UserController) GetAllUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, helpers.SuccessResponse{
+		Code: 200,
 		Message: "Users fetched successfully",
 		Data:    users,
 	})

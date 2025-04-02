@@ -28,7 +28,8 @@ type TaskBoardRepository interface {
 	Delete(taskBoardID uuid.UUID) error
 	AddCollaborator(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error)
 	RemoveCollaborator(taskBoardID uuid.UUID, userID uuid.UUID) error
-	CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (Role, error)
+	CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (*models.UserTaskBoard, error)
+	GetUsersOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error)
 }
 
 // TaskBoardRepositoryImpl is the concrete implementation of TaskBoardRepository
@@ -137,12 +138,30 @@ func (repo *TaskBoardRepositoryImpl) RemoveCollaborator(taskBoardID uuid.UUID, u
 	return repo.db.Delete(&models.UserTaskBoard{}, "task_board_id = ? AND user_id = ?", taskBoardID, userID).Error
 }
 
-func (repo *TaskBoardRepositoryImpl) CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (Role, error) {
-	var userTaskBoard models.UserTaskBoard
-	err := repo.db.Where("task_board_id = ? AND user_id = ?", taskBoardID, userID).First(&userTaskBoard).Error
+func (repo *TaskBoardRepositoryImpl) CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (*models.UserTaskBoard, error) {
+	var userTaskBoard *models.UserTaskBoard
+	err := repo.db.Where("task_board_id = ? AND user_id = ?", taskBoardID, userID).Preload("User").First(&userTaskBoard).Error
 	if err != nil {
-		return "", err
+		return userTaskBoard, err
 	}
 	
-	return Role(userTaskBoard.Role), nil
+	return userTaskBoard, nil
 }
+
+func (repo *TaskBoardRepositoryImpl) GetUsersOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error) {
+	var userTaskBoards []models.UserTaskBoard 
+
+	err := repo.db.
+		Where("task_board_id = ?", taskBoardID).
+		Preload("User").
+		Preload("TaskBoard").
+		Find(&userTaskBoards).Error 
+
+	if err != nil {
+		return nil, err
+	}
+
+	return userTaskBoards, nil
+}
+
+

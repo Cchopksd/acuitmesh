@@ -27,11 +27,12 @@ func (c *TaskController) CreateTask(ctx *gin.Context) {
 	var taskDTO dto.AssignTask
 
 	if err := ctx.ShouldBindJSON(&taskDTO); err != nil {
-		c.logger.Error("Invalid request body", zap.Error(err))
+		validationErrors := helpers.FormatValidationError(err)
+
 		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
 			Code:    http.StatusBadRequest,
-			Message: "Invalid request body",
-			Details: map[string]string{"error": err.Error()},
+			Message: "Validation failed",
+			Details: validationErrors,
 		})
 		return
 	}
@@ -70,8 +71,8 @@ func (c *TaskController) GetTaskByID(ctx *gin.Context) {
 	task, err := c.taskService.FindTaskByID(taskID)
 	if err != nil {
 		c.logger.Error("Failed to get task", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{
-			Code:    http.StatusInternalServerError,
+		ctx.JSON(http.StatusNotFound, helpers.ErrorResponse{
+			Code:    http.StatusNotFound,
 			Message: "Failed to get task",
 			Details: map[string]string{"error": err.Error()},
 		})
@@ -100,11 +101,11 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 
 	var taskDTO dto.UpdateTaskRequest
 	if err := ctx.ShouldBindJSON(&taskDTO); err != nil {
-		c.logger.Error("Invalid request body", zap.Error(err))
+		validationErrors := helpers.FormatValidationError(err)
 		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
 			Code:    http.StatusBadRequest,
-			Message: "Invalid request body",
-			Details: map[string]string{"error": err.Error()},
+			Message: "Validation failed",
+			Details: validationErrors,
 		})
 		return
 	}

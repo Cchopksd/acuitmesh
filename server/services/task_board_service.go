@@ -17,6 +17,7 @@ type TaskBoardService interface {
 	UpdateTaskBoard(taskID uuid.UUID, taskDTO *dto.TaskBoardRequest) (*models.TaskBoard, error)
 	DeleteTaskBoard(taskBoardID uuid.UUID) error
 	AddCollaboratorOnTaskBoard(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error)
+	GetCollaboratorOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error)
 }
 
 type TaskBoardServiceImpl struct {
@@ -125,4 +126,12 @@ func (service *TaskBoardServiceImpl) AddCollaboratorOnTaskBoard(addCollaboratorD
 
 
 	return service.taskBoardRepo.AddCollaborator(addCollaboratorDTO)
+}
+
+func (service *TaskBoardServiceImpl) GetCollaboratorOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error) {
+	users, err := service.taskBoardRepo.GetUsersOnTaskBoard(taskBoardID)
+	if err != nil {
+		return nil, err 
+	}
+	return users, nil 
 }

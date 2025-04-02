@@ -22,7 +22,6 @@ func NewAuthController(authService services.AuthService, logger *zap.Logger) *Au
 	}
 }
 
-// Login handles user authentication
 func (c *AuthController) Login(ctx *gin.Context) {
     var loginDTO dto.LoginRequest
 
@@ -41,6 +40,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
             zap.String("email", loginDTO.Email),
             zap.Error(err))
         ctx.JSON(http.StatusUnauthorized, helpers.ErrorResponse{
+            Code: 401,
             Message: "Authentication failed",
         })
         return
