@@ -12,7 +12,7 @@ export const getUserToken = async () => {
 export const decodeUserToken = async () => {
   const token = await getUserToken();
   if (!token) {
-    console.error("Token is not defined");
+    console.warn("Token is not defined");
     return;
   }
   const decoded = jwtDecode(token as string);
@@ -27,4 +27,3 @@ export const destroyUserToken = async () => {
 
   return;
 };
-

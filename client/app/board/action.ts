@@ -28,11 +28,9 @@ export const FetchTaskBoardByUser = async () => {
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (err) {
     console.error("Failed to fetch Task board:", err);
     return null;
   }
 };
-

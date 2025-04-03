@@ -2,14 +2,21 @@
 import React, { useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { Task } from "./interfaces/types";
+import { hasPermission, ROLES } from "@/app/utils/checkPermission";
 
 interface TaskCardProps {
   task: Task;
   onEdit: () => void;
   onDelete: () => void;
+  userRole: ROLES;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
+export default function TaskCard({
+  task,
+  onEdit,
+  onDelete,
+  userRole,
+}: TaskCardProps) {
   const [showActions, setShowActions] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -51,9 +58,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
   return (
     <div
       ref={ref}
-      className={`bg-white rounded-md shadow-sm p-3 mb-2 cursor-move ${
-        isDragging ? "opacity-50" : "opacity-100"
-      } transition-opacity duration-200 relative`}
+      className={`bg-white rounded-md shadow-sm p-3 mb-2 transition-opacity duration-200 relative 
+        ${isDragging ? "opacity-50" : "opacity-100"} 
+        ${
+          !hasPermission(userRole, [ROLES.OWNER, ROLES.EDITOR])
+            ? "opacity-50 pointer-events-none"
+            : ""
+        }
+      `}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}>
       <div className='flex justify-between items-start mb-2'>
@@ -98,6 +110,4 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
       )}
     </div>
   );
-};
-
-export default TaskCard;
+}

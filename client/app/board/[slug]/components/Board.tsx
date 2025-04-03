@@ -7,15 +7,18 @@ import TaskFormModal from "./TaskForm";
 import { Task, Column as ColumnType } from "./interfaces/types";
 import { MoreHorizontal } from "lucide-react";
 import { UpdateTask } from "../action";
+import { hasPermission, ROLES } from "@/app/utils/checkPermission";
 
 interface KanbanBoardProps {
   boardDetail: Task[];
   taskBoardID: string;
+  userRole: ROLES;
 }
 
 export default function KanbanBoard({
   boardDetail,
   taskBoardID,
+  userRole,
 }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>(boardDetail || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,8 +45,10 @@ export default function KanbanBoard({
       const message = JSON.parse(event.data);
       console.log(message.type);
       if (message.type === "create") {
+        // Add the new task to the state
         setTasks((prev) => [...prev, message.data]);
       } else if (message.type === "update") {
+        // Find the task in the state and update it
         setTasks((prev) =>
           prev.map((task) =>
             task.id === message.data.id ? message.data : task
@@ -115,11 +120,13 @@ export default function KanbanBoard({
       <div className='flex justify-between items-center mb-4'>
         <h1 className='text-3xl font-bold'>Board</h1>
         <div className='flex gap-4 items-center'>
-          <button
-            onClick={() => openModal()}
-            className='bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors'>
-            Release
-          </button>
+          {hasPermission(userRole, [ROLES.OWNER, ROLES.EDITOR]) && (
+            <button
+              onClick={() => openModal()}
+              className='bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors'>
+              Release
+            </button>
+          )}
           <button className='text-gray-600 hover:bg-gray-200 p-2 rounded-md'>
             <MoreHorizontal className='h-5 w-5' />
           </button>
@@ -134,6 +141,7 @@ export default function KanbanBoard({
             moveTask={moveTask}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
+            userRole={userRole}
           />
         ))}
       </div>

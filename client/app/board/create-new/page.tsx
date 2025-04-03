@@ -1,11 +1,10 @@
 import React from "react";
-import { TaskBoardForm } from "./components/Form";
+import TaskBoardForm from "./components/Form";
 
-export default function page() {
+export default async function page() {
   return (
-    <section className="h-full flex justify-center items-center">
+    <div className='h-full flex justify-center items-center'>
       <TaskBoardForm />
-    </section>
+    </div>
   );
 }
-

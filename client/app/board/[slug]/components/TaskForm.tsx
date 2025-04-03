@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { Task } from "./interfaces/types";
 import { CreateTask, UpdateTask } from "../action";
@@ -11,13 +12,13 @@ interface TaskFormModalProps {
   taskBoardID: string;
 }
 
-const TaskFormModal: React.FC<TaskFormModalProps> = ({
+export default function TaskFormModal({
   isOpen,
   onClose,
   onSave,
   editTask,
   taskBoardID,
-}) => {
+}: TaskFormModalProps) {
   const [task, setTask] = useState<Partial<Task>>({
     task_board_id: taskBoardID,
     title: "",
@@ -74,14 +75,14 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
         taskBoardID,
       });
       if (response.code == 200) {
-        window.location.reload();
+        onClose();
       }
       return;
     }
 
     const response = await CreateTask({ task: task as Task, taskBoardID });
     if (response.code == 201) {
-      window.location.reload();
+      onClose();
     }
 
     onSave(task);
@@ -219,6 +220,4 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
       </div>
     </div>
   );
-};
-
-export default TaskFormModal;
+}
