@@ -9,17 +9,17 @@ import { MoreHorizontal } from "lucide-react";
 import { UpdateTask } from "../action";
 import { hasPermission, ROLES } from "@/app/utils/checkPermission";
 
-interface KanbanBoardProps {
+interface BoardProps {
   boardDetail: Task[];
   taskBoardID: string;
   userRole: ROLES;
 }
 
-export default function KanbanBoard({
+export default function Board({
   boardDetail,
   taskBoardID,
   userRole,
-}: KanbanBoardProps) {
+}: BoardProps) {
   const [tasks, setTasks] = useState<Task[]>(boardDetail || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
@@ -133,7 +133,7 @@ export default function KanbanBoard({
         </div>
       </div>
 
-      <div className='flex flex-row space-x-4 overflow-x-auto pb-4'>
+      <div className='flex flex-col md:flex-row gap-4 overflow-x-auto pb-4'>
         {columns.map((column) => (
           <Column
             key={column.id}

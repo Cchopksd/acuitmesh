@@ -1,7 +1,7 @@
 "use server";
 import { MoreHorizontal } from "lucide-react";
 import React from "react";
-import KanbanBoard from "./components/Board";
+import Board from "./components/Board";
 import { FetchTaskBoardExTendTask } from "./action";
 import { decodeUserToken } from "@/app/utils/token";
 import { FetchUserRole } from "@/app/action";
@@ -18,7 +18,7 @@ export default async function page({
 
   return (
     <>
-      <KanbanBoard
+      <Board
         boardDetail={boardDetail.data.tasks}
         taskBoardID={slug}
         userRole={role}
