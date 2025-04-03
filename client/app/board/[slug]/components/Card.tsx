@@ -1,4 +1,4 @@
-// TaskCard.tsx
+"use client";
 import React, { useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { Task } from "./interfaces/types";
@@ -56,30 +56,30 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
       } transition-opacity duration-200 relative`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}>
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-sm">{task.title}</h3>
+      <div className='flex justify-between items-start mb-2'>
+        <h3 className='font-semibold text-sm'>{task.title}</h3>
         <span
           className={`px-2 py-1 rounded-full text-white text-xs ${getPriorityColor()}`}>
           {task.priority}
         </span>
       </div>
-      <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+      <p className='text-gray-600 text-xs mb-2 line-clamp-2'>
         {task.description}
       </p>
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className='flex justify-between text-xs text-gray-500'>
         <span>
           {formatDate(task.start_date)} - {formatDate(task.end_date)}
         </span>
       </div>
 
       {showActions && (
-        <div className="absolute bottom-2 right-2 flex space-x-1">
+        <div className='absolute bottom-2 right-2 flex space-x-1'>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
-            className="p-1 text-xs bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+            className='p-1 text-xs bg-blue-100 text-blue-600 rounded hover:bg-blue-200'>
             Edit
           </button>
           <button
@@ -91,7 +91,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
                 onDelete();
               }
             }}
-            className="p-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200">
+            className='p-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200'>
             Delete
           </button>
         </div>
@@ -101,4 +101,3 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
 };
 
 export default TaskCard;
-

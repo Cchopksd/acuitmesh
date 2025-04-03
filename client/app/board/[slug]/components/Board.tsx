@@ -13,10 +13,10 @@ interface KanbanBoardProps {
   taskBoardID: string;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({
+export default function KanbanBoard({
   boardDetail,
   taskBoardID,
-}) => {
+}: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>(boardDetail || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
@@ -34,6 +34,26 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }));
     setColumns(newColumns);
   }, [tasks]);
+
+  useEffect(() => {
+    const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || "");
+
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log(message.type);
+      if (message.type === "create") {
+        setTasks((prev) => [...prev, message.data]);
+      } else if (message.type === "update") {
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === message.data.id ? message.data : task
+          )
+        );
+      } else if (message.type === "delete") {
+        setTasks((prev) => prev.filter((task) => task.id !== message.data));
+      }
+    };
+  }, []);
 
   const moveTask = async (taskId: string, newStatus: Task["status"]) => {
     setTasks((prevTasks) =>
@@ -92,21 +112,21 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">Board</h1>
-        <div className="flex gap-4 items-center">
+      <div className='flex justify-between items-center mb-4'>
+        <h1 className='text-3xl font-bold'>Board</h1>
+        <div className='flex gap-4 items-center'>
           <button
             onClick={() => openModal()}
-            className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+            className='bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors'>
             Release
           </button>
-          <button className="text-gray-600 hover:bg-gray-200 p-2 rounded-md">
-            <MoreHorizontal className="h-5 w-5" />
+          <button className='text-gray-600 hover:bg-gray-200 p-2 rounded-md'>
+            <MoreHorizontal className='h-5 w-5' />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-row space-x-4 overflow-x-auto pb-4">
+      <div className='flex flex-row space-x-4 overflow-x-auto pb-4'>
         {columns.map((column) => (
           <Column
             key={column.id}
@@ -127,7 +147,4 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       />
     </DndProvider>
   );
-};
-
-export default KanbanBoard;
-
+}
