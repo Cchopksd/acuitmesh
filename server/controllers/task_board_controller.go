@@ -73,7 +73,10 @@ func (controller *TaskBoardController) GetTaskBoardByID(ctx *gin.Context) {
 		return
 	}
 
-	taskBoard, err := controller.taskBoardService.FindTaskBoardByIDExtendTasks(id)
+	status := ctx.Query("status")       
+	priority := ctx.Query("priority")
+
+	taskBoard, err := controller.taskBoardService.FindTaskBoardByIDExtendTasks(id, status, priority)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, helpers.ErrorResponse{
 			Code:    http.StatusNotFound,
@@ -88,6 +91,7 @@ func (controller *TaskBoardController) GetTaskBoardByID(ctx *gin.Context) {
 		Data:    taskBoard,
 	})
 }
+
 
 func (controller *TaskBoardController) GetTaskBoardsByUserID(ctx *gin.Context) {
 	userID, err := uuid.Parse(ctx.Param("user_id"))

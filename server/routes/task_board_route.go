@@ -34,7 +34,7 @@ func TaskBoardRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 			protected.DELETE("/:id", taskBoardController.DeleteTaskBoard)      
 			protected.POST("/:id/collaborators", taskBoardController.AddCollaborator) 
 			protected.GET("/:id/collaborators", taskBoardController.GetCollaboratorOnTaskBoard) 
-			protected.GET("/:id/check-collaborators-permission/user_id/:user_id", taskBoardController.CheckUserRole) 
+			protected.GET("/:id/check-collaborators-permission/user_id/:user_id", taskBoardController.CheckUserRole)
 		}
 	}
 }

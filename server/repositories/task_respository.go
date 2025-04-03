@@ -3,6 +3,7 @@ package repositories
 import (
 	"fmt"
 	"log"
+	"server/dto"
 	"server/models"
 
 	"github.com/google/uuid"
@@ -39,6 +40,17 @@ func (repo *TaskRepositoryImpl) Create(task *models.Task) (*models.Task, error) 
 func (repo *TaskRepositoryImpl) FindByID(taskID uuid.UUID) (*models.Task, error) {
 	var task models.Task
 	err := repo.db.Preload("TaskBoard").First(&task, "id = ?", taskID).Error
+	if err != nil {
+		return nil, err 
+	}
+	return &task, nil
+}
+
+func (repo *TaskRepositoryImpl) SortByStatusAndPriority(sortByPriorityAndStatus dto.SortByPriorityAndStatus) (*models.Task, error) {
+	var task models.Task
+	err := repo.db.Preload("TaskBoard").
+	First(&task, "id = ? AND status = ? AND priority =? ", sortByPriorityAndStatus.TaskID, sortByPriorityAndStatus.Status, sortByPriorityAndStatus.Priority).
+	Error
 	if err != nil {
 		return nil, err 
 	}

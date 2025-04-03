@@ -12,8 +12,8 @@ import (
 
 type TaskBoardService interface {
 	CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.UserTaskBoard, error)
-	FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID) (*models.TaskBoard, error)
-	FindTaskBoardByUserID(userID uuid.UUID) ([]models.TaskBoard, error)
+	FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status string, priority string) (*models.TaskBoard, error)
+    FindTaskBoardByUserID(userID uuid.UUID) ([]models.TaskBoard, error)
 	UpdateTaskBoard(taskID uuid.UUID, taskDTO *dto.TaskBoardRequest) (*models.TaskBoard, error)
 	DeleteTaskBoard(taskBoardID uuid.UUID) error
 	AddCollaboratorOnTaskBoard(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error)
@@ -74,14 +74,16 @@ func (service *TaskBoardServiceImpl) CreateTaskBoard(taskBoardDTO *dto.TaskBoard
 }
 
 
-func (service *TaskBoardServiceImpl) FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID) (*models.TaskBoard ,error){
-	taskBoard, err := service.taskBoardRepo.FindByID(taskBoardID)
+func (service *TaskBoardServiceImpl) FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status string, priority string) (*models.TaskBoard, error) {
+	taskBoard, err := service.taskBoardRepo.FindByIDWithFilter(taskBoardID, &status, &priority)
 
 	if err != nil {
 		return nil, err
 	}
 	return taskBoard, nil
 }
+
+
 
 func (service *TaskBoardServiceImpl) FindTaskBoardByUserID(userID uuid.UUID) ([]models.TaskBoard, error) {
 	taskBoards, err := service.taskBoardRepo.FindByUserID(userID)

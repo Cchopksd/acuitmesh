@@ -35,7 +35,6 @@ func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, wsServ
 		}
 	}
 
-	// ✅ เพิ่ม WebSocket Endpoint
 	router.GET("/ws", func(c *gin.Context) {
 		wsService.HandleConnections(c.Writer, c.Request)
 	})

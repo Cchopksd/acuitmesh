@@ -64,7 +64,6 @@ func (service *TaskServiceImpl) CreateTask(taskDTO *dto.AssignTask) (*models.Tas
 		return nil, err
 	}
 
-	// ✅ ส่งข้อมูลไปยัง WebSocket เมื่อมีการสร้าง Task ใหม่
 	service.wsService.Broadcast("create", taskResponse)
 
 	return taskResponse, nil
@@ -89,7 +88,6 @@ func (service *TaskServiceImpl) UpdateTask(taskID uuid.UUID, taskDTO *dto.Update
 		return nil, err
 	}
 
-	// ✅ บรอดแคสต์ Task ที่อัปเดตให้ทุก Client
 	service.wsService.Broadcast("update", updatedTask)
 
 	return updatedTask, nil
@@ -100,7 +98,6 @@ func (service *TaskServiceImpl) 	DeleteTask(taskID uuid.UUID, userID uuid.UUID) 
 		return fmt.Errorf("failed to delete task with ID %s: %w", taskID, err)
 	}
 
-	// ✅ บรอดแคสต์การลบ Task ให้ทุก Client
 	service.wsService.Broadcast("delete", taskID)
 
 	return nil

@@ -17,6 +17,13 @@ type AssignTask struct {
     EndDate     time.Time `json:"end_date" binding:"required"`
 }
 
+type TaskBoardFind struct {
+    ID       uuid.UUID  `gorm:"type:uuid;primary_key"`
+    Status   *string    `gorm:"default:null"`  
+    Priority *int       `gorm:"default:null"`  
+    BoardID  uuid.UUID  `gorm:"type:uuid;not null"`
+}
+
 
 type UpdateTaskRequest struct {
     UserID      uuid.UUID `json:"user_id" binding:"required"`
@@ -40,4 +47,10 @@ type AddCollaborator struct {
 	Email       string `json:"email" binding:"required"`
 	TaskBoardID uuid.UUID `json:"task_board_id" binding:"required"`
 	Role        string `json:"role" binding:"required,oneof=owner editor viewer"`
+}
+
+type SortByPriorityAndStatus struct {
+    TaskID      uuid.UUID `json:"task_id" binding:"required"`
+    Status      string    `json:"status" binding:"oneof=todo in_progress done"`
+    Priority    string    `json:"priority" binding:"oneof=low medium high"`
 }
