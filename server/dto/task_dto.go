@@ -34,7 +34,6 @@ type TaskBoardRequest struct {
 	Description string     `json:"description" binding:"max=255"`
 	User        string     `json:"user" binding:"required,uuid"`
     Role        string     `gorm:"size:50;not null" json:"role" binding:"required,oneof=owner editor viewer"`
-
 }
 
 type AddCollaborator struct {

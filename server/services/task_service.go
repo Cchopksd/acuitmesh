@@ -25,10 +25,14 @@ type TaskServiceImpl struct {
 	logger        *zap.Logger
 }
 
-// FindTaskByID implements TaskService.
 func (service *TaskServiceImpl) FindTaskByID(taskID uuid.UUID) (*models.Task, error) {
-	panic("unimplemented")
+	task, err := service.taskRepo.FindByID(taskID)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
+
 
 func NewTaskService(
 	taskRepo repositories.TaskRepository,
@@ -50,6 +54,9 @@ func (service *TaskServiceImpl) CreateTask(taskDTO *dto.AssignTask) (*models.Tas
 		Title:       taskDTO.Title,
 		Description: taskDTO.Description,
 		Status:      taskDTO.Status,
+		Priority:    taskDTO.Priority,
+		StartDate:   taskDTO.StartDate,
+		EndDate:     taskDTO.EndDate,
 	}
 
 	taskResponse, err := service.taskRepo.Create(task)
@@ -69,8 +76,13 @@ func (service *TaskServiceImpl) UpdateTask(taskID uuid.UUID, taskDTO *dto.Update
 		return nil, err
 	}
 
-	task.Title = taskDTO.Title
-	task.Status = taskDTO.Status
+		task.TaskBoardID = taskDTO.TaskBoardID
+		task.Title =       taskDTO.Title
+		task.Description= taskDTO.Description
+		task.Status =      taskDTO.Status
+		task.Priority =  taskDTO.Priority
+		task.StartDate =   taskDTO.StartDate
+		task.EndDate =     taskDTO.EndDate
 
 	updatedTask, err := service.taskRepo.Update(taskID, task)
 	if err != nil {

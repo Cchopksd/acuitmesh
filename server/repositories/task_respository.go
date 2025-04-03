@@ -38,7 +38,7 @@ func (repo *TaskRepositoryImpl) Create(task *models.Task) (*models.Task, error) 
 
 func (repo *TaskRepositoryImpl) FindByID(taskID uuid.UUID) (*models.Task, error) {
 	var task models.Task
-	err := repo.db.First(&task, "id = ?", taskID).Error
+	err := repo.db.Preload("TaskBoard").First(&task, "id = ?", taskID).Error
 	if err != nil {
 		return nil, err 
 	}
