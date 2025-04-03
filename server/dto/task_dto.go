@@ -37,7 +37,7 @@ type TaskBoardRequest struct {
 }
 
 type AddCollaborator struct {
-	UserID      uuid.UUID `json:"user_id" binding:"required"`
-	TaskBoardID 	uuid.UUID `json:"task_board_id" binding:"required"`
+	Email       string `json:"email" binding:"required"`
+	TaskBoardID uuid.UUID `json:"task_board_id" binding:"required"`
 	Role        string `json:"role" binding:"required,oneof=owner editor viewer"`
 }

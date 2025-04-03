@@ -3,7 +3,6 @@ package repositories
 import (
 	"fmt"
 	"log"
-	"server/dto"
 	"server/models"
 
 	"github.com/google/uuid"
@@ -26,7 +25,7 @@ type TaskBoardRepository interface {
 	FindByID(taskBoardID uuid.UUID) (*models.TaskBoard, error)
 	Update(taskBoardID uuid.UUID, taskBoard *models.TaskBoard) (*models.TaskBoard, error)
 	Delete(taskBoardID uuid.UUID) error
-	AddCollaborator(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error)
+	AddCollaborator(UserID uuid.UUID, TaskBoardID uuid.UUID, role Role) (*models.UserTaskBoard, error)
 	RemoveCollaborator(taskBoardID uuid.UUID, userID uuid.UUID) error
 	CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (*models.UserTaskBoard, error)
 	GetUsersOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error)
@@ -114,24 +113,23 @@ func (repo *TaskBoardRepositoryImpl) Delete(taskBoardID uuid.UUID) error {
 	return repo.db.Delete(&models.TaskBoard{}, "id = ?", taskBoardID).Error
 }
 
-func (repo *TaskBoardRepositoryImpl) AddCollaborator(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error) {
-    userTaskBoard := models.UserTaskBoard{
-        UserID:      addCollaboratorDTO.UserID,
-        TaskBoardID: addCollaboratorDTO.TaskBoardID,
-        Role:        addCollaboratorDTO.Role,
-    }
+func (repo *TaskBoardRepositoryImpl) AddCollaborator(UserID uuid.UUID, TaskBoardID uuid.UUID, role Role) (*models.UserTaskBoard, error) {
+	userTaskBoard := models.UserTaskBoard{
+		UserID:      UserID,
+		TaskBoardID: TaskBoardID,
+		Role:        string(role),
+	}
 
-    if err := repo.db.Create(&userTaskBoard).Error; err != nil {
-        return nil, err
-    }
+	if err := repo.db.Create(&userTaskBoard).Error; err != nil {
+		return nil, err
+	}
 
-    if err := repo.db.Preload("User").Preload("TaskBoard").
-        First(&userTaskBoard, "user_id = ? AND task_board_id = ?", 
-            addCollaboratorDTO.UserID, addCollaboratorDTO.TaskBoardID).Error; err != nil {
-        return nil, err
-    }
+	if err := repo.db.Preload("User").Preload("TaskBoard").
+		First(&userTaskBoard, "user_id = ? AND task_board_id = ?", userTaskBoard.UserID, userTaskBoard.TaskBoardID).Error; err != nil {
+		return nil, err
+	}
 
-    return &userTaskBoard, nil
+	return &userTaskBoard, nil
 }
 
 func (repo *TaskBoardRepositoryImpl) RemoveCollaborator(taskBoardID uuid.UUID, userID uuid.UUID) error {

@@ -228,6 +228,43 @@ func (c *TaskBoardController) AddCollaborator(ctx *gin.Context) {
 	})
 }
 
+func (c *TaskBoardController) CheckUserRole(ctx *gin.Context) {
+	taskBoardID, err := uuid.Parse(ctx.Param("id"))
+	fmt.Print(taskBoardID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid task board ID",
+		})
+		return
+	}
+
+	userID, err := uuid.Parse(ctx.Param("user_id"))
+	fmt.Print(userID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid task board ID",
+		})
+		return
+	}
+
+	collaborator, err := c.taskBoardService.CheckUserRole(taskBoardID, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to retrieve collaborator",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helpers.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "Collaborator retrieved successfully",
+		Data:    collaborator,
+	})
+}
+
 func (c *TaskBoardController) GetCollaboratorOnTaskBoard(ctx *gin.Context) {
 	taskBoardID, err := uuid.Parse(ctx.Param("id"))
 	fmt.Print(taskBoardID)

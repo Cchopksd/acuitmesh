@@ -18,6 +18,7 @@ type TaskBoardService interface {
 	DeleteTaskBoard(taskBoardID uuid.UUID) error
 	AddCollaboratorOnTaskBoard(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error)
 	GetCollaboratorOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error)
+	CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (*models.UserTaskBoard, error)
 }
 
 type TaskBoardServiceImpl struct {
@@ -112,7 +113,11 @@ func (service *TaskBoardServiceImpl) DeleteTaskBoard(taskBoardID uuid.UUID) erro
 }
 
 func (service *TaskBoardServiceImpl) AddCollaboratorOnTaskBoard(addCollaboratorDTO dto.AddCollaborator) (*models.UserTaskBoard, error) {
-	if _, err := service.userRepo.GetUserByID(addCollaboratorDTO.UserID); err != nil {
+	user, err := service.userRepo.FindByEmail(addCollaboratorDTO.Email)
+	if err != nil {
+		return nil, fmt.Errorf("error finding user: %v", err)
+	}
+	if user == nil {
 		return nil, fmt.Errorf("user not found")
 	}
 
@@ -120,12 +125,19 @@ func (service *TaskBoardServiceImpl) AddCollaboratorOnTaskBoard(addCollaboratorD
 		return nil, fmt.Errorf("task board not found")
 	}
 
-	if _, err := service.taskBoardRepo.CheckUserRole(addCollaboratorDTO.TaskBoardID, addCollaboratorDTO.UserID); err == nil {
+	if _, err := service.taskBoardRepo.CheckUserRole(addCollaboratorDTO.TaskBoardID, user.ID); err == nil {
 		return nil, fmt.Errorf("user already exists on this task board")
 	}
 
+	return service.taskBoardRepo.AddCollaborator(user.ID, addCollaboratorDTO.TaskBoardID, repositories.Role(addCollaboratorDTO.Role))
+}
 
-	return service.taskBoardRepo.AddCollaborator(addCollaboratorDTO)
+func (service *TaskBoardServiceImpl) CheckUserRole(taskBoardID uuid.UUID, userID uuid.UUID) (*models.UserTaskBoard, error) {
+	userTaskBoard, err := service.taskBoardRepo.CheckUserRole(taskBoardID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return userTaskBoard, nil
 }
 
 func (service *TaskBoardServiceImpl) GetCollaboratorOnTaskBoard(taskBoardID uuid.UUID) ([]models.UserTaskBoard, error) {
