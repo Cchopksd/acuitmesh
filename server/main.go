@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/signal"
 	config "server/configs"
-	"server/handlers/websocket"
 	"server/routes"
+	"server/websocket"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -35,9 +35,9 @@ func main() {
 	r.Use(gin.Recovery())
 	r.SetTrustedProxies(nil)
 
-	// Initialize WebSocket Hub
-	wsHub := websocket.NewHub()
-	go wsHub.Run()
+
+	// ✅ สร้าง WebSocket Service
+	wsService := websocket.NewWebSocketService()
 
 	// Setup routes
 	apiGroup := r.Group("/api")
@@ -45,7 +45,7 @@ func main() {
 		routes.UserRoutes(apiGroup, config.DB, zapLogger)
 		routes.AuthRoutes(apiGroup, config.DB, zapLogger)
 		routes.TaskBoardRoutes(apiGroup, config.DB, zapLogger)
-		routes.TaskRoutes(apiGroup, config.DB, zapLogger)
+		routes.TaskRoutes(apiGroup, config.DB, zapLogger, wsService)
 	}
 
 	// Start HTTP server
@@ -67,9 +67,6 @@ func main() {
 	<-sigChan
 
 	logger.Info("Shutting down server...")
-
-	// Close WebSocket connections gracefully
-	wsHub.Shutdown()
 
 	logger.Info("Server stopped.")
 }

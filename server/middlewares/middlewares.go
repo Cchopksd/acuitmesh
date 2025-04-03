@@ -48,9 +48,7 @@ func AuthMiddleware(logger *zap.Logger) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
-
 		c.Set("userID", claims.ID)
-
 		c.Next()
 	}
 }

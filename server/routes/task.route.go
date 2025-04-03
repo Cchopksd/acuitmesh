@@ -5,6 +5,7 @@ import (
 	"server/middlewares"
 	"server/repositories"
 	"server/services"
+	"server/websocket"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,25 +13,30 @@ import (
 	"gorm.io/gorm"
 )
 
-func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
-	taskRepository := repositories.NewTaskRepository(db)
-	taskBoardRepository := repositories.NewTaskBoardRepository(db)
-	taskService := services.NewTaskService(taskRepository, logger, taskBoardRepository)
+func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, wsService *websocket.WebSocketService) {
+	taskRepo := repositories.NewTaskRepository(db)
+	taskBoardRepo := repositories.NewTaskBoardRepository(db)
+	taskService := services.NewTaskService(taskRepo, taskBoardRepo, wsService, logger)
 	taskController := controllers.NewTaskController(taskService, logger)
 
 	taskGroup := router.Group("/tasks")
 	{
 		protected := taskGroup.Group("")
 		protected.Use(
-			middlewares.AuthMiddleware(logger),       
-			middlewares.RequestLogger(logger),        
+			middlewares.AuthMiddleware(logger),
+			middlewares.RequestLogger(logger),
 			middlewares.RateLimiter(100, time.Minute),
 		)
 		{
 			taskGroup.POST("/", taskController.CreateTask)
 			taskGroup.GET("/:id", taskController.GetTaskByID)
 			taskGroup.PUT("/:id", taskController.UpdateTask)
-			taskGroup.DELETE("/:id/task_board_id/:id/user_id/:id", taskController.DeleteTask)
+			taskGroup.DELETE("/:id", taskController.DeleteTask)
 		}
 	}
+
+	// ✅ เพิ่ม WebSocket Endpoint
+	router.GET("/ws", func(c *gin.Context) {
+		wsService.HandleConnections(c.Writer, c.Request)
+	})
 }
