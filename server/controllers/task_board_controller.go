@@ -255,8 +255,8 @@ func (c *TaskBoardController) CheckUserRole(ctx *gin.Context) {
 
 	collaborator, err := c.taskBoardService.CheckUserRole(taskBoardID, userID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helpers.ErrorResponse{
-			Code:    http.StatusInternalServerError,
+		ctx.JSON(http.StatusForbidden, helpers.ErrorResponse{
+			Code:    http.StatusForbidden,
 			Message: "Failed to retrieve collaborator",
 		})
 		return

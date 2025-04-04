@@ -28,6 +28,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
     if err := ctx.ShouldBindJSON(&loginDTO); err != nil {
         c.logger.Warn("Invalid login request", zap.Error(err))
         ctx.JSON(http.StatusBadRequest, helpers.ErrorResponse{
+            Code:    http.StatusBadRequest,
             Message: "Invalid request format",
             Details:  helpers.FormatValidationError(err),
         })
