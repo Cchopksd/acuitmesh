@@ -114,7 +114,7 @@ export default function Board({
   };
 
   const handleDeleteTask = (taskId: string) => {
-    DeleteTask({ task: taskId , taskBoardID });
+    DeleteTask({ task: taskId, taskBoardID });
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
@@ -156,17 +156,22 @@ export default function Board({
           />
           <Search className="absolute right-3" />
         </div>
-        <div>
-          <button
-            onClick={() => {
-              setDropdownFilter((prev) => {
-                return !prev;
-              });
-            }}
-            className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
-            Quick Filter
-          </button>
-        </div>
+
+        <button
+          onClick={() => {
+            setDropdownFilter((prev) => {
+              return !prev;
+            });
+          }}
+          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+          Quick Filter
+        </button>
+
+        <a
+          href={`${taskBoardID}/schedule`}
+          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+          Schedule
+        </a>
       </div>
       {dropdownFilter && (
         <div className="flex mb-4 gap-4">
