@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	// Initialize loggers
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.SetLevel(logrus.InfoLevel)
@@ -26,20 +25,15 @@ func main() {
 	}
 	defer zapLogger.Sync()
 
-	// Initialize database
 	config.Connect()
 	config.AutoMigrate()
 
-	// Create Gin router
 	r := gin.Default()
 	r.Use(gin.Recovery())
 	r.SetTrustedProxies(nil)
 
-
-	// ✅ สร้าง WebSocket Service
 	wsService := gateway.NewWebSocketService()
 
-	// Setup routes
 	apiGroup := r.Group("/api")
 	{
 		routes.UserRoutes(apiGroup, config.DB, zapLogger)
@@ -48,20 +42,23 @@ func main() {
 		routes.TaskRoutes(apiGroup, config.DB, zapLogger, wsService)
 	}
 
-	// Start HTTP server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":"+port,
 		Handler: r,
 	}
 
 	go func() {
-		logger.Info("Starting server on port 8080...")
+		logger.Info("Starting server on port " + port + "...")		
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatal("Error running the server: ", err)
 		}
 	}()
 
-	// Graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan
