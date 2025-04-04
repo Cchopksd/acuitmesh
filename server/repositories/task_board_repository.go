@@ -23,7 +23,7 @@ type TaskBoardRepository interface {
 	CreateUserBoard(userTaskBoard *models.UserTaskBoard) (*models.UserTaskBoard, error)
 	FindByUserID(userID uuid.UUID) ([]models.TaskBoard, error)
 	FindByID(taskBoardID uuid.UUID) (*models.TaskBoard, error)
-	FindByIDWithFilter(taskBoardID uuid.UUID, status *string, priority *string) (*models.TaskBoard, error)
+	FindByIDWithFilter(taskBoardID uuid.UUID, status []string, priority []string) (*models.TaskBoard, error)
 	Update(taskBoardID uuid.UUID, taskBoard *models.TaskBoard) (*models.TaskBoard, error)
 	Delete(taskBoardID uuid.UUID) error
 	AddCollaborator(UserID uuid.UUID, TaskBoardID uuid.UUID, role Role) (*models.UserTaskBoard, error)
@@ -78,20 +78,20 @@ func (repo *TaskBoardRepositoryImpl) FindByID(taskBoardID uuid.UUID) (*models.Ta
 	return &taskBoard, nil
 }
 
-func (repo *TaskBoardRepositoryImpl) FindByIDWithFilter(taskBoardID uuid.UUID, status *string, priority *string) (*models.TaskBoard, error) {
+func (repo *TaskBoardRepositoryImpl) FindByIDWithFilter(taskBoardID uuid.UUID, status  []string, priorities []string) (*models.TaskBoard, error) {
 	var taskBoard models.TaskBoard
 	if err := repo.db.First(&taskBoard, "id = ?", taskBoardID).Error; err != nil {
 		return nil, err
 	}
 
 	tasksQuery := repo.db.Model(&models.Task{}).Where("task_board_id = ?", taskBoardID)
-	
-	if status != nil && *status != "" {
-		tasksQuery = tasksQuery.Where("status = ?", *status)
+
+	if len(status) > 0 {
+		tasksQuery = tasksQuery.Where("status IN (?)", status)
 	}
-	
-	if priority != nil && *priority != "" {
-		tasksQuery = tasksQuery.Where("priority = ?", *priority)
+
+	if len(priorities) > 0 {
+		tasksQuery = tasksQuery.Where("priority IN (?)", priorities)
 	}
 
 	var filteredTasks []models.Task
@@ -103,6 +103,7 @@ func (repo *TaskBoardRepositoryImpl) FindByIDWithFilter(taskBoardID uuid.UUID, s
 
 	return &taskBoard, nil
 }
+
 
 
 func (repo *TaskBoardRepositoryImpl) FindByUserID(userID uuid.UUID) ([]models.TaskBoard, error) {

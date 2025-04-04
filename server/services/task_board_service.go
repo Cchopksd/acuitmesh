@@ -12,7 +12,7 @@ import (
 
 type TaskBoardService interface {
 	CreateTaskBoard(taskBoardDTO *dto.TaskBoardRequest) (*models.UserTaskBoard, error)
-	FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status string, priority string) (*models.TaskBoard, error)
+	FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status []string, priority []string) (*models.TaskBoard, error)
     FindTaskBoardByUserID(userID uuid.UUID) ([]models.TaskBoard, error)
 	UpdateTaskBoard(taskID uuid.UUID, taskDTO *dto.TaskBoardRequest) (*models.TaskBoard, error)
 	DeleteTaskBoard(taskBoardID uuid.UUID) error
@@ -74,9 +74,8 @@ func (service *TaskBoardServiceImpl) CreateTaskBoard(taskBoardDTO *dto.TaskBoard
 }
 
 
-func (service *TaskBoardServiceImpl) FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status string, priority string) (*models.TaskBoard, error) {
-	taskBoard, err := service.taskBoardRepo.FindByIDWithFilter(taskBoardID, &status, &priority)
-
+func (service *TaskBoardServiceImpl) FindTaskBoardByIDExtendTasks(taskBoardID uuid.UUID, status []string, priority []string) (*models.TaskBoard, error) {
+	taskBoard, err := service.taskBoardRepo.FindByIDWithFilter(taskBoardID, status, priority)
 	if err != nil {
 		return nil, err
 	}
