@@ -101,7 +101,7 @@ export const UpdateTask = async ({
     const token = await getUserToken();
     const userInfo = (await decodeUserToken()) as JwtPayload & { id: string };
     const response = await fetch(`${process.env.API_URL}/tasks/${task.id}`, {
-      method: "Put",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -122,5 +122,37 @@ export const UpdateTask = async ({
   }
 };
 
-export const DeleteTask = async () => {};
+export const DeleteTask = async ({
+  task,
+  taskBoardID,
+}: {
+  task: string;
+  taskBoardID: string;
+}) => {
+  try {
+    const token = await getUserToken();
+    const userInfo = (await decodeUserToken()) as JwtPayload & { id: string };
+    const response = await fetch(
+      `${process.env.API_URL}/tasks/${task}/task_board_id/${taskBoardID}/user_id/${userInfo.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Failed to create Task:", err);
+    return null;
+  }
+};
 

@@ -22,7 +22,8 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "sweetalert2": "^11.17.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

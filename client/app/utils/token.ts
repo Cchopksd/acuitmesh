@@ -1,3 +1,4 @@
+"use server";
 import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 
@@ -22,8 +23,6 @@ export const decodeUserToken = async () => {
 
 export const destroyUserToken = async () => {
   const cookieStore = await cookies();
-
   cookieStore.delete("token-user");
-
   return;
 };

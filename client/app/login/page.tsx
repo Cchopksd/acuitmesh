@@ -39,7 +39,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/board");
+    window.location.href = "/board";
   };
 
   return (

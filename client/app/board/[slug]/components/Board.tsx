@@ -6,9 +6,10 @@ import Column from "./Column";
 import TaskFormModal from "./TaskForm";
 import { Task, Column as ColumnType } from "./interfaces/types";
 import { MoreHorizontal, Search } from "lucide-react";
-import { UpdateTask } from "../action";
+import { DeleteTask, UpdateTask } from "../action";
 import { hasPermission, ROLES } from "@/app/utils/checkPermission";
 import Filter from "./Filter";
+import Swal from "sweetalert2";
 
 interface BoardProps {
   boardDetail: Task[];
@@ -113,6 +114,7 @@ export default function Board({
   };
 
   const handleDeleteTask = (taskId: string) => {
+    DeleteTask({ task: taskId , taskBoardID });
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
@@ -139,7 +141,17 @@ export default function Board({
             type="text"
             name=""
             id=""
-            onChange={(e) => {}}
+            onClick={() => {
+              return Swal.fire({
+                title: "Please let me to join your team!!!",
+                text: "u didnt tell me to query with text",
+                imageUrl:
+                  "https://preview.redd.it/c6ysm6olojm71.jpg?auto=webp&s=c479feeac177309c5894b78720dec8025d6c818c",
+                imageWidth: 400,
+                imageHeight: 300,
+                imageAlt: "Custom image",
+              });
+            }}
             className="bg-gray-200 rounded-md py-2 pl-3 w-full"
           />
           <Search className="absolute right-3" />

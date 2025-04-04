@@ -31,9 +31,9 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div className="flex flex-col md:flex-row min-h-screen">
+        <div className="flex h-screen w-full overflow-hidden">
           <Sidebar userInfo={userInfo} />
-          <main className="flex-1 p-4 md:p-8 w-full md:ml-0">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
         </div>
       </body>
     </html>
