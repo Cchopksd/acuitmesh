@@ -3,9 +3,9 @@ package services
 import (
 	"fmt"
 	"server/dto"
+	"server/gateway"
 	"server/models"
 	"server/repositories"
-	"server/websocket"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -15,13 +15,13 @@ type TaskService interface {
 	CreateTask(taskDTO *dto.AssignTask) (*models.Task, error)
 	FindTaskByID(taskID uuid.UUID) (*models.Task, error)
 	UpdateTask(taskID uuid.UUID, taskDTO *dto.UpdateTaskRequest) (*models.Task, error)
-	DeleteTask(taskID uuid.UUID, userID uuid.UUID) error
+	DeleteTask(taskID uuid.UUID) error
 }
 
 type TaskServiceImpl struct {
 	taskRepo      repositories.TaskRepository
 	taskBoardRepo repositories.TaskBoardRepository
-	wsService     *websocket.WebSocketService
+	wsService     *gateway.WebSocketService
 	logger        *zap.Logger
 }
 
@@ -37,7 +37,7 @@ func (service *TaskServiceImpl) FindTaskByID(taskID uuid.UUID) (*models.Task, er
 func NewTaskService(
 	taskRepo repositories.TaskRepository,
 	taskBoardRepo repositories.TaskBoardRepository,
-	wsService *websocket.WebSocketService,
+	wsService *gateway.WebSocketService,
 	logger *zap.Logger,
 ) *TaskServiceImpl {
 	return &TaskServiceImpl{
@@ -93,7 +93,7 @@ func (service *TaskServiceImpl) UpdateTask(taskID uuid.UUID, taskDTO *dto.Update
 	return updatedTask, nil
 }
 
-func (service *TaskServiceImpl) 	DeleteTask(taskID uuid.UUID, userID uuid.UUID) error {
+func (service *TaskServiceImpl) DeleteTask(taskID uuid.UUID) error {
 	if err := service.taskRepo.Delete(taskID); err != nil {
 		return fmt.Errorf("failed to delete task with ID %s: %w", taskID, err)
 	}

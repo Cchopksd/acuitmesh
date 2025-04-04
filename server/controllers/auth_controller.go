@@ -36,12 +36,10 @@ func (c *AuthController) Login(ctx *gin.Context) {
 
     token, err := c.authService.Login(loginDTO.Email, loginDTO.Password)
     if err != nil {
-        c.logger.Info("Login failed", 
-            zap.String("email", loginDTO.Email),
-            zap.Error(err))
+        c.logger.Warn("Login failed", zap.Error(err))
         ctx.JSON(http.StatusUnauthorized, helpers.ErrorResponse{
             Code: 401,
-            Message: "Authentication failed",
+            Message: err.Error(),
         })
         return
     }

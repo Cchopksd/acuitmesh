@@ -26,14 +26,20 @@ func TaskBoardRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger) {
 			middlewares.RequestLogger(logger),        
 			middlewares.RateLimiter(100, time.Minute),
 		)
-		{
-			protected.POST("", taskBoardController.CreateTaskBoard)           
+		{	
+			// viewer editor owner
 			protected.GET("/:id", taskBoardController.GetTaskBoardByID)        
-			protected.GET("/user/:user_id", taskBoardController.GetTaskBoardsByUserID)       
+			protected.GET("/user/:user_id", taskBoardController.GetTaskBoardsByUserID)
+
+			// owner 
+			protected.POST("", taskBoardController.CreateTaskBoard)           
 			protected.PUT("/:id", taskBoardController.UpdateTaskBoard)         
 			protected.DELETE("/:id", taskBoardController.DeleteTaskBoard)      
+			
+
 			protected.POST("/:id/collaborators", taskBoardController.AddCollaborator) 
 			protected.GET("/:id/collaborators", taskBoardController.GetCollaboratorOnTaskBoard) 
+
 			protected.GET("/:id/check-collaborators-permission/user_id/:user_id", taskBoardController.CheckUserRole)
 		}
 	}

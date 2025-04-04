@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/signal"
 	config "server/configs"
+	"server/gateway"
 	"server/routes"
-	"server/websocket"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func main() {
 
 
 	// ✅ สร้าง WebSocket Service
-	wsService := websocket.NewWebSocketService()
+	wsService := gateway.NewWebSocketService()
 
 	// Setup routes
 	apiGroup := r.Group("/api")

@@ -25,31 +25,23 @@ func NewAuthService(userRepo repositories.UserRepository, logger *zap.Logger) Au
 }
 
 func (s *AuthServiceImpl) Login(email, password string) (string, error) {
-	// Check if email or password is empty
 	if email == "" || password == "" {
 		return "", fmt.Errorf("email and password are required")
 	}
 
-	// Find user by email
 	user, err := s.userRepo.FindByEmail(email)
 
 	if err != nil {
 		s.logger.Warn("Failed to find user by email", zap.String("email", email), zap.Error(err))
-		return "", fmt.Errorf("authentication failed")
-	}
-
-	if user == nil {
 		return "", fmt.Errorf("email or password is incorrect")
 	}
 
-	// Verify password
 	passwordMatch := utils.VerifyPassword(user.Password, password)
-	fmt.Println("Password Match:", passwordMatch)
+	
 	if !passwordMatch {
 		return "", fmt.Errorf("email or password is incorrect")
 	}
 
-	// Generate JWT token
 	token, err := utils.CreateToken(utils.User{
 		ID:    user.ID.String(),
 		Name:  user.Name,
@@ -60,7 +52,6 @@ func (s *AuthServiceImpl) Login(email, password string) (string, error) {
 		return "", fmt.Errorf("authentication failed")
 	}
 
-	// Successfully generated token
 	s.logger.Info("User logged in successfully", zap.String("email", email))
 
 	return token, nil

@@ -2,10 +2,10 @@ package routes
 
 import (
 	"server/controllers"
+	"server/gateway"
 	"server/middlewares"
 	"server/repositories"
 	"server/services"
-	"server/websocket"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, wsService *websocket.WebSocketService) {
+func TaskRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, wsService *gateway.WebSocketService) {
 	taskRepo := repositories.NewTaskRepository(db)
 	taskBoardRepo := repositories.NewTaskBoardRepository(db)
 	taskService := services.NewTaskService(taskRepo, taskBoardRepo, wsService, logger)

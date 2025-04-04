@@ -1,12 +1,15 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
+	"server/services"
 	"server/utils"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -51,6 +54,55 @@ func AuthMiddleware(logger *zap.Logger) gin.HandlerFunc {
 		c.Set("userID", claims.ID)
 		c.Next()
 	}
+}
+
+func HasPermission(permission string, taskBoardService services.TaskBoardService, logger *zap.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		taskBoardID := c.Param("id")
+		userID := c.GetString("userID") 
+		fmt.Println("userID", userID)
+		taskBoardUUID, err := uuid.Parse(taskBoardID)
+		if err != nil {
+			logger.Error("Invalid task board ID", zap.Error(err))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task board ID"})
+			c.Abort()
+			return
+		}
+
+		userUUID, err := uuid.Parse(userID)
+		if err != nil {
+			logger.Error("Invalid user ID", zap.Error(err))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			c.Abort()
+			return
+		}
+
+		userTaskBoard, err := taskBoardService.CheckUserRole(taskBoardUUID, userUUID)
+		if err != nil {
+			logger.Error("Error fetching user role", zap.Error(err))
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+
+		if !hasRequiredPermission(userTaskBoard.Role, permission) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func hasRequiredPermission(userRole, requiredRole string) bool {
+	roleHierarchy := map[string]int{
+		"viewer": 1,
+		"editor": 2,
+		"owner":  3,
+	}
+
+	return roleHierarchy[userRole] >= roleHierarchy[requiredRole]
 }
 
 func RateLimiter(limit int, window time.Duration) gin.HandlerFunc {
