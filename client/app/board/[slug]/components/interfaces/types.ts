@@ -34,3 +34,15 @@ export interface DragItem {
   status: Task["status"];
 }
 
+export enum Statuses {
+  TODO = "todo",
+  IN_PROGRESS = "in_progress",
+  DONE = "done",
+}
+
+export enum Priorities {
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+}
+

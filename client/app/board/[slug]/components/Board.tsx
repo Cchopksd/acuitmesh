@@ -5,9 +5,10 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import Column from "./Column";
 import TaskFormModal from "./TaskForm";
 import { Task, Column as ColumnType } from "./interfaces/types";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Search } from "lucide-react";
 import { UpdateTask } from "../action";
 import { hasPermission, ROLES } from "@/app/utils/checkPermission";
+import Filter from "./Filter";
 
 interface BoardProps {
   boardDetail: Task[];
@@ -23,6 +24,7 @@ export default function Board({
   const [tasks, setTasks] = useState<Task[]>(boardDetail || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const [dropdownFilter, setDropdownFilter] = useState(false);
 
   const [columns, setColumns] = useState<ColumnType[]>([
     { id: "1", title: "To Do", status: "todo", tasks: [] },
@@ -43,7 +45,6 @@ export default function Board({
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log(message.type);
       if (message.type === "create") {
         // Add the new task to the state
         setTasks((prev) => [...prev, message.data]);
@@ -117,23 +118,51 @@ export default function Board({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className='flex justify-between items-center mb-4'>
-        <h1 className='text-3xl font-bold'>Board</h1>
-        <div className='flex gap-4 items-center'>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">Board</h1>
+        <div className="flex gap-4 items-center">
           {hasPermission(userRole, [ROLES.OWNER, ROLES.EDITOR]) && (
             <button
               onClick={() => openModal()}
-              className='bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors'>
+              className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
               Release
             </button>
           )}
-          <button className='text-gray-600 hover:bg-gray-200 p-2 rounded-md'>
-            <MoreHorizontal className='h-5 w-5' />
+          <button className="text-gray-600 hover:bg-gray-200 p-2 rounded-md">
+            <MoreHorizontal className="h-5 w-5" />
           </button>
         </div>
       </div>
+      <div className="flex mb-4 gap-4">
+        <div className="flex relative items-center ">
+          <input
+            type="text"
+            name=""
+            id=""
+            onChange={(e) => {}}
+            className="bg-gray-200 rounded-md py-2 pl-3 w-full"
+          />
+          <Search className="absolute right-3" />
+        </div>
+        <div>
+          <button
+            onClick={() => {
+              setDropdownFilter((prev) => {
+                return !prev;
+              });
+            }}
+            className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+            Quick Filter
+          </button>
+        </div>
+      </div>
+      {dropdownFilter && (
+        <div className="flex mb-4 gap-4">
+          <Filter />
+        </div>
+      )}
 
-      <div className='flex flex-col md:flex-row gap-4 overflow-x-auto pb-4'>
+      <div className="flex flex-col md:flex-row gap-4 overflow-x-auto pb-4">
         {columns.map((column) => (
           <Column
             key={column.id}

@@ -17,13 +17,9 @@ export const registerAction = async ({
       body: JSON.stringify({ name, email, password }),
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    const data = await response.json();
 
-    const { data } = await response.json();
-
-    return 201;
+    return data;
   } catch (err) {
     console.error("Login failed:", err);
     return null;

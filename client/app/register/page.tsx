@@ -94,9 +94,17 @@ const RegisterPage = () => {
     try {
       const response = await registerAction(formData);
 
-      if (response === 201) {
-        router.push("/login");
+      if (response.code === 400) {
+        alert("Bad Request");
+        return;
       }
+
+      if (response.code === 409) {
+        alert("An account with this email already exists.");
+        return;
+      }
+
+      router.push("/login");
     } catch (error) {
       setErrors({
         general:

@@ -2,19 +2,49 @@
 
 import { decodeUserToken, getUserToken } from "@/app/utils/token";
 import { JwtPayload } from "jwt-decode";
-import { Task } from "./components/interfaces/types";
+import { Priorities, Statuses, Task } from "./components/interfaces/types";
 
-export const FetchTaskBoardExTendTask = async ({ id }: { id: string }) => {
+export const FetchTaskBoardExtendTask = async ({
+  id,
+  statuses,
+  priorities,
+}: {
+  id: string;
+  statuses?: Statuses[] | Statuses;
+  priorities?: Priorities[] | Priorities;
+}) => {
   try {
     const token = await getUserToken();
-    const response = await fetch(`${process.env.API_URL}/task-boards/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+
+    let query: string[] = [];
+
+    if (Array.isArray(priorities) && priorities.length > 0) {
+      priorities.forEach((element) => {
+        query.push(`priority=${element}`);
+      });
+    } else if (priorities) {
+      query.push(`priority=${priorities}`);
+    }
+
+    if (Array.isArray(statuses) && statuses.length > 0) {
+      statuses.forEach((element) => {
+        query.push(`status=${element}`);
+      });
+    } else if (statuses) {
+      query.push(`status=${statuses}`);
+    }
+
+    const response = await fetch(
+      `${process.env.API_URL}/task-boards/${id}?${query.join("&")}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         cache: "no-store",
-      },
-    });
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -50,7 +80,6 @@ export const CreateTask = async ({
     const data = await response.json();
 
     if (!response.ok) {
-      console.log(data);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
@@ -83,7 +112,6 @@ export const UpdateTask = async ({
     const data = await response.json();
 
     if (!response.ok) {
-      console.log(data);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
@@ -95,3 +123,4 @@ export const UpdateTask = async ({
 };
 
 export const DeleteTask = async () => {};
+
