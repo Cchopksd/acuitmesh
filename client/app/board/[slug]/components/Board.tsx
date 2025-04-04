@@ -169,7 +169,7 @@ export default function Board({
 
         <a
           href={`${taskBoardID}/schedule`}
-          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors text-center items-center flex">
           Schedule
         </a>
       </div>
