@@ -2,8 +2,17 @@
 
 ## Client
 
-**Deployment Platform:** [Vercel](https://vercel.com/)  
-**Root Directory:** `./client`
+route path to ```./client```
+
+**install package**
+```
+npm install
+```
+
+**run command**
+```
+npm run dev
+```
 
 **Environment Variables:**
 ```env
@@ -11,9 +20,33 @@ API_URL=http://localhost:8080/api
 NEXT_PUBLIC_WS_URL=ws://localhost:8080/api/ws
 ```
 
+
+**Deployment Platform:** [Vercel](https://vercel.com/)  
+**Root Directory:** `./client`
+
 ---
 
 ## Server
+
+route path to `./server`
+
+**install package**
+```
+go install
+```
+**run command**
+```
+go run main.go
+```
+
+
+
+**Environment Variables:**
+```env
+PORT=8080
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/acuitmesh?sslmode=disable
+JWT_SECRET=u1LOJgLKMmflskmf2234_*
+```
 
 **Deployment Platform:** [Railway](https://railway.com/)  
 **Root Directory:** `./server`  
@@ -27,13 +60,6 @@ go build -o server
 **Custom Start Command:**
 ```bash
 server
-```
-
-**Environment Variables:**
-```env
-PORT=8080
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/acuitmesh?sslmode=disable
-JWT_SECRET=u1LOJgLKMmflskmf2234_*
 ```
 
 ---
