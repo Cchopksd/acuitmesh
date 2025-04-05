@@ -94,5 +94,3 @@ Comprehensive API documentation is available via Postman:
 4. Each **Task Board** can contain multiple **Tasks**.
 
 ---
-
-Let me know if you'd like this formatted for Markdown/README rendering, or converted to another format (e.g., PDF or HTML).
