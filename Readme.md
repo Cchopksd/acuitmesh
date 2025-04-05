@@ -30,7 +30,7 @@ NEXT_PUBLIC_WS_URL=ws://localhost:8080/api/ws
 
 ## Server
 
-Production: [Server]([https://acuitmesh.vercel.app/](https://acuitmesh-production.up.railway.app/))
+Production: [Server](https://acuitmesh-production.up.railway.app/)
 
 route path to `./server`
 
