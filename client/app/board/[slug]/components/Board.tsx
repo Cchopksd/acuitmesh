@@ -141,17 +141,17 @@ export default function Board({
             type="text"
             name=""
             id=""
-            onClick={() => {
-              return Swal.fire({
-                title: "Please let me to join your team!!!",
-                text: "u didnt tell me to query with text",
-                imageUrl:
-                  "https://preview.redd.it/c6ysm6olojm71.jpg?auto=webp&s=c479feeac177309c5894b78720dec8025d6c818c",
-                imageWidth: 400,
-                imageHeight: 300,
-                imageAlt: "Custom image",
-              });
-            }}
+            // onClick={() => {
+            //   return Swal.fire({
+            //     title: "Please let me to join your team!!!",
+            //     text: "u didnt tell me to query with text",
+            //     imageUrl:
+            //       "https://preview.redd.it/c6ysm6olojm71.jpg?auto=webp&s=c479feeac177309c5894b78720dec8025d6c818c",
+            //     imageWidth: 400,
+            //     imageHeight: 300,
+            //     imageAlt: "Custom image",
+            //   });
+            // }}
             className="bg-gray-200 rounded-md py-2 pl-3 w-full"
           />
           <Search className="absolute right-3" />
